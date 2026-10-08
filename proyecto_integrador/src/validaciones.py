@@ -27,40 +27,35 @@ def verificar_duplicado(registros, fecha, evento):
     
     return False  # Retorna False si no se encuentra duplicado
 
-def validar_format_fecha(mensaje):
-    """Valida que la fecha ingresada tenga el formato correcto (DD/MM/AAAA)."""
-    patron = r'^\d{2}/\d{2}/\d{4}$'  # Expresión regular para validar el formato de fecha (DD/MM/AAAA)
-    while True:
-        fecha = input(mensaje).strip()
-        if fecha == '0' or fecha == '':
-            return None # Permite cancelar la operación con '0' o ENTER
-        
-        # Comprobamos si cumple el patrón de fecha con 're'
-        if re.match(patron, fecha):
-            return fecha
-        
-        print("¨[❌ERROR]: Formato de fecha inválido. Ingrese '0' o ENTER para cancelar.")
+from datetime import datetime
+import re
 
 def validar_fecha_valida(mensaje):
-    """Valida que la fecha ingresada sea una fecha válida (ej: 31/02/2023 no es válida)."""
-    patron = r'^\d{2}/\d{2}/\d{4}$'
+    """
+    Función unificada: Valida en un solo paso que la fecha tenga 
+    el formato correcto (DD/MM/AAAA) y que sea un día real del calendario.
+    Permite cancelar ingresando '0' o presionando ENTER.
+    """
+    patron = r'^\d{2}/\d{2}/\d{4}$'  # Expresión regular para el formato
+    
     while True:
         fecha_str = input(mensaje).strip()
+        
+        # Opción de salida / cancelación
         if fecha_str == '0' or fecha_str == '':
-            return None # Permite cancelar la operación con '0' o ENTER
+            return None 
 
-        # 1. Validar formato con Expresión Regular
+        # PASO 1: Validar el formato visual con la expresión regular
         if not re.match(patron, fecha_str):
-            print("[❌ ERROR]: Formato inválido. Use DD/MM/AAAA (o '0'/ENTER para cancelar).")
-            continue
+            print("[❌ ERROR]: Formato inválido. Use estrictamente DD/MM/AAAA (o '0'/ENTER para cancelar).")
+            continue  # Vuelve a pedir el ingreso
 
-        # 2. Validar que la fecha sea real (ej: que no sea 31 de febrero)
+        # PASO 2: Validar que sea una fecha real en el calendario (ej: evita el 31/02/2026)
         try:
-            # Intentamos convertir el texto a un objeto fecha real
-            datetime.strftime(fecha_str, "%d/%m/%Y")
-            return fecha_str  # Retorna la fecha válida en formato de texto
+            datetime.strptime(fecha_str, "%d/%m/%Y")
+            return fecha_str  # Si pasó ambas pruebas, retornamos la fecha lista para usar
         except ValueError:
-            print("[❌ ERROR]: Fecha inexistente en el calendario. Ingrese una fecha válida.")
+            print("[❌ ERROR]: La fecha ingresada no existe en el calendario. Ingrese una fecha real.")
 
 def validar_evento(evento):
     """
@@ -92,3 +87,18 @@ def validar_evento(evento):
         return False
     
     return evento_limpio # Devuelve el texto ya 'strippeado' listo para ser almacenado
+
+def leer_campo_opcional(mensaje, valor_por_defecto="Sin especificar"):
+    """
+    Solicita un campo de texto opcional al usuario.
+    - Si ingresa '0', retorna None (señal de cancelación).
+    - Si presiona ENTER (vacío), retorna el valor por defecto.
+    - Si ingresa texto válido, lo retorna.
+    """
+    texto = validar_texto(mensaje)
+    
+    if texto == '0':
+        return None  # Indicador de cancelación
+        
+    # Si dio ENTER devuelve el valor por defecto, sino el texto ingresado
+    return texto if texto else valor_por_defecto

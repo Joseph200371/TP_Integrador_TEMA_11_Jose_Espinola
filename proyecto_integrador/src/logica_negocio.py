@@ -3,8 +3,8 @@
 # Contiene todas las funciones atómicas del ABM
 # ===============================================
 from utils.utilidades import limpiar_pantalla, pausa, mostrar_encabezado, imprimir_info, ANCHO
-
-from validaciones import validar_texto, verificar_duplicado, validar_format_fecha, validar_fecha_valida, validar_evento
+from persistencia import guardar_datos
+from validaciones import validar_texto, verificar_duplicado, validar_fecha_valida, validar_evento, leer_campo_opcional
 
 # --- 1. ALTA (Crear Registro - Opción 1) ---
 def crear_registro(registros):
@@ -18,11 +18,12 @@ def crear_registro(registros):
     print("-" * ANCHO)
 
     # Solicitar al usuario que ingrese el nuevo evento (FECHA, EVENTO, LUGAR, NOTAS)
-    # PASO 1: Capturar y validar la fecha usando la función leer_fecha_nueva()
-    fecha = validar_fecha_valida()
+    # PASO 1: Capturar y validar la fecha de forma directa
+    fecha = validar_fecha_valida("Ingrese la fecha del evento (DD/MM/AAAA) [0/ENTER para cancelar]: ")
     if fecha is None:
         print("\n[INFO]: Operación de creación cancelada.")
-        return  # Sale de la función de inmediato sin alterar la lista de registros
+        pausa()
+        return
 
     # PASO 2: Capturar y validar el nombre del evento
     evento = leer_evento_nuevo()
@@ -35,39 +36,23 @@ def crear_registro(registros):
         print(f"\n[❌ ERROR]: Ya existe un evento idéntico ('{evento}') registrado para la fecha {fecha}.")
         pausa()
         return
-
-    # PASO 4: Lugar
-    lugar = validar_texto("Ingrese el lugar del evento [0/ENTER para omitir/cancelar]: ")
-    if lugar == '0':  # Omitimos si decide cancelar explícitamente con 0
+    
+    # PASO 4: Capturar el lugar del evento
+    lugar = leer_campo_opcional("Ingrese el lugar del evento [0/ENTER para omitir]: ", "Sin especificar")
+    if lugar is None:
         print("\n[INFO]: Operación de creación cancelada.")
         pausa()
         return
-    lugar = lugar if lugar else "Sin especificar"  # Si da ENTER directo, ponemos un valor por defecto
 
-    # PASO 5: Notas
-    notas = validar_texto("Ingrese notas adicionales [0/ENTER para omitir/cancelar]: ")
-    if notas == '0':
+    # PASO 5: Capturar notas adicionales
+    notas = leer_campo_opcional("Ingrese notas adicionales [0/ENTER para omitir]: ", "Sin notas")
+    if notas is None:
         print("\n[INFO]: Operación de creación cancelada.")
         pausa()
         return
-    notas = notas if notas else "Sin notas"
-    
-    # Aquí luego agregarás lugar, notas y el almacenamiento en la lista 'registros'
-    print(f"\n[ÉXITO]: Evento registrado correctamente -> Fecha: {fecha} | Evento: {evento}")
-    pausa()
-    pass
 
-def leer_fecha_nueva():
-    """
-    Función auxiliar de lectura: Se apoya en validar_fecha_valida() 
-    para asegurar que la fecha tenga el formato DD/MM/AAAA y sea real.
-    
-    Retorna:
-        str: La fecha ingresada correctamente.
-        None: Si el usuario cancela la operación ('0' o ENTER).
-    """
-    # Llamamos directamente a tu función robusta de validación de fecha
-    return validar_fecha_valida("Ingrese la fecha del evento (DD/MM/AAAA) [0/ENTER para cancelar]: ")
+    # PASO 6: Delegamos la construcción y guardado a nuestra nueva función auxiliar
+    _registrar_y_persistir(registros, fecha, evento, lugar, notas)
 
 def leer_evento_nuevo():
     """
@@ -94,6 +79,43 @@ def leer_evento_nuevo():
             continue # Vuelve a solicitar el ingreso sin romper el programa
 
         return evento
+
+def _registrar_y_persistir(registros, fecha, evento, lugar, notas):
+    """
+    Función auxiliar interna.
+    Propósito: Encapsular la lógica de creación del diccionario, 
+    inserción en memoria, persistencia en archivos y feedback al usuario.
+    
+    Defensa para el profesor:
+    - Aplica el principio DRY y modularidad extrema.
+    - Centraliza la mutación de la lista 'registros' y la llamada a persistencia.
+    """
+    # 1. Construimos el diccionario con un ID autoincremental seguro
+    nuevo_item = {
+        "id": len(registros) + 1,
+        "fecha": fecha,
+        "evento": evento,
+        "lugar": lugar,
+        "notas": notas
+    }
+    
+    # 2. Añadimos el ítem a la lista en memoria RAM
+    registros.append(nuevo_item)
+
+    # 3. Guardamos permanentemente en JSON y CSV llamando al módulo de persistencia
+    guardar_datos(registros)
+
+    # 4. Mensaje visual de éxito para el usuario
+    print(f"\n[ÉXITO]: ¡Evento registrado y guardado exitosamente en el sistema!")
+    print(f" --------------------------------------------------------")
+    print(f" -> ID Asignado : {nuevo_item['id']}")
+    print(f" -> Fecha       : {fecha}")
+    print(f" -> Evento      : {evento}")
+    print(f" -> Lugar       : {lugar}")
+    print(f" -> Notas       : {notas}")
+    print(f" --------------------------------------------------------")
+    
+    pausa()
 
 # --- 2. MODIFICACIÓN (Actualizar Registro - Opción 2) ---
 def actualizar_registro(registros):
