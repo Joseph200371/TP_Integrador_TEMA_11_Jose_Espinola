@@ -30,11 +30,27 @@ def crear_registro(registros):
         print("\n[INFO]: Operación de creación cancelada.")
         return  # Sale de la función de inmediato sin alterar la lista de registros
 
-    # 3. Control de duplicados (Clave única)
+    # PASO 3: Control de duplicados (Clave única: Fecha + Evento)
     if verificar_duplicado(registros, fecha, evento):
         print(f"\n[❌ ERROR]: Ya existe un evento idéntico ('{evento}') registrado para la fecha {fecha}.")
         pausa()
         return
+
+    # PASO 4: Lugar
+    lugar = validar_texto("Ingrese el lugar del evento [0/ENTER para omitir/cancelar]: ")
+    if lugar == '0':  # Omitimos si decide cancelar explícitamente con 0
+        print("\n[INFO]: Operación de creación cancelada.")
+        pausa()
+        return
+    lugar = lugar if lugar else "Sin especificar"  # Si da ENTER directo, ponemos un valor por defecto
+
+    # PASO 5: Notas
+    notas = validar_texto("Ingrese notas adicionales [0/ENTER para omitir/cancelar]: ")
+    if notas == '0':
+        print("\n[INFO]: Operación de creación cancelada.")
+        pausa()
+        return
+    notas = notas if notas else "Sin notas"
     
     # Aquí luego agregarás lugar, notas y el almacenamiento en la lista 'registros'
     print(f"\n[ÉXITO]: Evento registrado correctamente -> Fecha: {fecha} | Evento: {evento}")
