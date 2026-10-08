@@ -177,5 +177,8 @@ def ejecutar_opcion():
         else:
             ejecutando = True
 
+# =============================================
+# PUNTO DE ENTRADA DEL PROGRAMA
+# =============================================
 if __name__ == "__main__":
     ejecutar_opcion() # Variable de control

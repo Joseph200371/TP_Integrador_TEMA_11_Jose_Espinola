@@ -29,7 +29,7 @@ def mostrar_encabezado(texto, limpiar = True, ancho=75):
         limpiar_pantalla()
         
     print("=" * ancho)
-    print(f"{texto.upper():^{ANCHO}}")
+    print(f"{texto.upper():^{ancho}}")
     print("=" * ancho + "\n")
 
 # FUNCIÓN: IMPRIMIR MENSAJE DE INFORMACIÓN

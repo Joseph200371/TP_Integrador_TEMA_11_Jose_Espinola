@@ -61,3 +61,34 @@ def validar_fecha_valida(mensaje):
             return fecha_str  # Retorna la fecha válida en formato de texto
         except ValueError:
             print("[❌ ERROR]: Fecha inexistente en el calendario. Ingrese una fecha válida.")
+
+def validar_evento(evento):
+    """
+    Valida que el texto del evento cumpla con los requisitos mínimos:
+    - No puede estar vacío ni contener solo espacios.
+    - Longitud máxima de 50 caracteres (para evitar desbordes en consola).
+    - Debe contener al menos una letra (evita cadenas formadas solo por números o símbolos).
+    
+    Retorna:
+        str: El texto limpio y 'strippeado' si es válido.
+        False: Si no cumple con las reglas de validación.
+    """
+    if not evento or not isinstance(evento, str):
+        return False
+    
+    # .strip() elimina espacios sobrantes al inicio y final
+    evento_limpio = evento.strip()  # Elimina espacios al inicio y al final
+
+    # Validar capos vacíos o exceso de caracteres
+    if not evento_limpio or len(evento_limpio) > 50:
+        return False
+
+    # """Validar que el evento contenga solo letras, números y espacios"""
+    #   if not re.match(r'^[A-Za-z0-9 ]+$', evento):
+    #        return False
+
+    # Asegurar mediante .isalpha() que exista al menos un carácter alfabético
+    if not any(caracter.isalpha() for caracter in evento_limpio):  # Asegura que haya al menos una letra
+        return False
+    
+    return evento_limpio # Devuelve el texto ya 'strippeado' listo para ser almacenado
