@@ -102,3 +102,16 @@ def leer_campo_opcional(mensaje, valor_por_defecto="Sin especificar"):
         
     # Si dio ENTER devuelve el valor por defecto, sino el texto ingresado
     return texto if texto else valor_por_defecto
+
+def verificar_registros_existentes(registros, mensaje_error="No hay eventos registrados en el sistema actualmente."):
+    """
+    Función auxiliar para validar si la lista de registros contiene elementos.
+    
+    - Centraliza la validación de colección vacía (evita código repetido en el CRUD).
+    - Si está vacía, notifica al usuario con un mensaje claro, ejecuta la pausa y retorna False.
+    - Si contiene elementos, retorna True permitiendo que la operación continúe.
+    """
+    if not registros:
+        print(f"[ℹ️ INFO]: {mensaje_error}")
+        return False
+    return True
