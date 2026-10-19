@@ -4,7 +4,6 @@
 # =========================================================
 
 from utils.utilidades import pausa, mostrar_encabezado, imprimir_info, ANCHO
-
 # Importamos las funciones del módulo de lógica de negocio
 from logica_negocio import (
     crear_registro,
@@ -12,55 +11,17 @@ from logica_negocio import (
     listar_registros,
     buscar_registro,
     eliminar_registro)
-
 # AQUÍ IMPORTAMOS LAS FUNCIONES DE PERSISTENCIA
-from persistencia import cargar_datos, guardar_datos
+from persistencia import (
+    cargar_datos,
+    guardar_json_manual,
+    cargar_json_manual,
+    guardar_csv_manual,
+    cargar_csv_manual,
+    generar_dataset
+    )
 
 # from graficos import grafico_histograma, grafico_barras, grafico_boxplot, grafico_torta, panel_subplots
-
-# =========================================================
-# FUNCIONES ENRUTADORAS (Conectan el menú con la lógica)
-# =========================================================
-def fn_opcion_1(registros):
-    """Menú de gestión del sistema (Opciones 1 al 5 originales - Opciones CRUD)"""
-    return fn_sub_gestion_sistema(registros)
-
-def fn_opcion_2():
-    """Gestión de Datos y Dataset (Opciones 6 al 10 originales)"""
-    mostrar_encabezado("Gestión de Datos y Dataset")
-    imprimir_info("[INFO]: Aquí desplegaremos el submenú de JSON, CSV y Dataset automático.")
-    pausa()
-    return True
-
-def fn_opcion_3():
-    """Visualizaciones Gráficas (Opciones 11 al 15 originales)"""
-    mostrar_encabezado("Visualizaciones Gráficas")
-    imprimir_info("[INFO]: Aquí desplegaremos el submenú de gráficos de Matplotlib y Panel 2x2.")
-    pausa()
-    return True
-
-def fn_opcion_4():
-    """Salir del sistema"""
-    mostrar_encabezado("Saliendo del Sistema")
-    print("¡Gracias por utilizar el Calendario de Eventos! Programa finalizado correctamente.\n")
-    return False  # Este False rompe el bucle
-
-def fn_opcion_invalida():
-    """Manejo de opción fuera de rango"""
-    mostrar_encabezado("Opción Inválida")
-    print("[❌ ERROR]: La opción ingresada no es válida. Por favor, seleccione un número entre 1 y 4.")
-    pausa()
-    return True
-
-# ==========================
-# DICCIONARIO DE ACCIONES 
-# ==========================
-MENU_ACCIONES = {
-    1: fn_opcion_1,
-    2: fn_opcion_2,
-    3: fn_opcion_3,
-    4: fn_opcion_4
-}
 
 def imprimir_menu_principal():
     """Mostrar el menú principal por pantalla."""
@@ -72,9 +33,9 @@ def imprimir_menu_principal():
     print("4. Salir del Sistema")
     print("=" * ANCHO + "\n")
 
-# =========================================================
-# FUNCIONES ENRUTADORAS (Sub_menu conectado al menú)
-# =========================================================
+# ===========================================================
+# FUNCIONES ENRUTADORAS - CRUD (Sub_menu conectado al menú)
+# ===========================================================
 def fn_sub_gestion_sistema(registros):
     """Submenú de Gestión del Sistema (Opciones CRUD)"""
     sub_ejecutando = True
@@ -82,6 +43,7 @@ def fn_sub_gestion_sistema(registros):
     while sub_ejecutando:
         # Usamos limpiar=True solo una vez aquí al inicio del ciclo
         mostrar_encabezado("--- SUBMENÚ: GESTIÓN DEL SISTEMA ---", limpiar=True)
+        imprimir_info("[INFO]: Aquí desplegaremos el submenú de Crear, Actualizar, Listar, Buscar y Eliminar registros.")
         print(" 1. Crear Registro")
         print(" 2. Actualizar Registro")
         print(" 3. Listar Registros")
@@ -107,7 +69,7 @@ def fn_sub_gestion_sistema(registros):
             6: lambda: False  # Rompe el bucle del submenú y vuelve al principal
         }
         
-        accion = acciones_sub.get(opcion_sub, fn_opcion_invalida_sub)
+        accion = acciones_sub.get(opcion_sub, fn_opcion_invalida)
         sub_ejecutando = accion()
         
     return True # Mantiene vivo el menú principal
@@ -133,10 +95,65 @@ def fn_sub_listar(registros):
     listar_registros(registros)
     return True
 
-def fn_opcion_invalida_sub():
-    mostrar_encabezado("Opción Inválida")
-    print("[❌ ERROR]: Opción fuera de rango en el submenú.")
-    pausa()
+# ===========================================================
+# FUNCIONES ENRUTADORAS - DATOS (Sub_menu conectado al menú)
+# ===========================================================
+def fn_sub_gestion_dato(registros):
+    """Submenú de Gestión de Datos y Dataset (JSON, CSV y Dataset)"""
+    sub_ejecutando = True
+
+    while sub_ejecutando:
+        # Usamos limpiar=True solo una vez aquí al inicio del ciclo
+        mostrar_encabezado("--- SUBMENÚ: GESTIÓN DE DATOS Y DATASET ---", limpiar=True)
+        imprimir_info("[INFO]: Aquí desplegaremos el submenú de JSON, CSV y Dataset automático.")
+        print(" 1. Guardar Datos en JSON")
+        print(" 2. Cargar Datos desde JSON")
+        print(" 3. Guardar Datos en CSV")
+        print(" 4. Cargar Datos desde CSV")
+        print(" 5. Generación Automática de Dataset (Registros de prueba)")
+        print(" 6. Volver al Menú Principal")
+        print("=" * ANCHO + "\n")
+
+        try:
+            opcion_sub = int(input("Seleccione una opción (1-6): ").strip())
+        except ValueError:
+            print("[❌ ERROR]: Debe ingresar un número entero válido.")
+            pausa()
+            continue
+        
+        # Diccionario interno para el submenú usando lambdas para pasar 'registros'
+        acciones_sub = {
+            1: lambda: fn_guardar_json(registros),
+            2: lambda: fn_cargar_json(registros),
+            3: lambda: fn_guardar_csv(registros),
+            4: lambda: fn_cargar_csv(registros),
+            5: lambda: fn_generar_dataset(registros),
+            6: lambda: False  # Rompe el bucle del submenú y vuelve al principal
+        }
+        
+        accion = acciones_sub.get(opcion_sub, fn_opcion_invalida)
+        sub_ejecutando = accion()
+        
+    return True # Mantiene vivo el menú principal
+
+def fn_guardar_json(registros):
+    guardar_json_manual(registros)
+    return True
+
+def fn_cargar_json(registros):
+    cargar_json_manual(registros)
+    return True
+
+def fn_guardar_csv(registros):
+    guardar_csv_manual(registros)
+    return True
+
+def fn_cargar_csv(registros):
+    cargar_csv_manual(registros)
+    return True
+
+def fn_generar_dataset(registros):
+    generar_dataset(registros)
     return True
 
 # =========================================================
@@ -158,11 +175,12 @@ def ejecutar_opcion():
     registros = cargar_datos()
 
     # 2. Definimos el diccionario de acciones conectando 'registros' a la opción 1
-    menu_acciones = {
-        1: lambda: fn_opcion_1(registros),
-        2: fn_opcion_2,
-        3: fn_opcion_3,
-        4: fn_opcion_4
+    # DICCIONARIO DE ACCIONES 
+    MENU_ACCIONES = {
+        1: lambda: fn_opcion_1(registros),  # Submenú CRUD (Gestión del Sistema)
+        2: lambda: fn_opcion_2(registros),  # Submenú Datos (JSON, CSV, Dataset)
+        3: lambda: fn_opcion_3(registros),  # Submenú Gráficos (Visualizaciones)
+        4: lambda: fn_opcion_4()            # Salir del sistema
     }
 
     ejecutando = True
@@ -177,13 +195,40 @@ def ejecutar_opcion():
         else:
             ejecutando = True
 
-# Y actualizamos ligeramente fn_opcion_1 para que reciba la lista:
+# =========================================================
+# FUNCIONES ENRUTADORAS (Conectan el menú con la lógica)
+# =========================================================
 def fn_opcion_1(registros):
-    """Menú de gestión del sistema (Opciones CRUD)"""
+    """Menú de gestión del sistema (Opciones 1 al 5 originales - Opciones CRUD)"""
     return fn_sub_gestion_sistema(registros)
+
+def fn_opcion_2(registros):
+    """Gestión de Datos y Dataset (Opciones 6 al 10 originales)"""
+    return fn_sub_gestion_dato(registros)
+
+def fn_opcion_3(res):
+    """Visualizaciones Gráficas (Opciones 11 al 15 originales)"""
+    mostrar_encabezado("Visualizaciones Gráficas")
+    imprimir_info("[INFO]: Aquí desplegaremos el submenú de gráficos de Matplotlib y Panel 2x2.")
+    pausa()
+    return True
+
+def fn_opcion_4():
+    """Salir del sistema"""
+    mostrar_encabezado("Saliendo del Sistema")
+    imprimir_info("¡Gracias por utilizar el Calendario de Eventos! Programa finalizado correctamente.\n")
+    pausa()
+    return False  # Indica que se debe salir del bucle principal y terminar el programa
+
+def fn_opcion_invalida():
+    mostrar_encabezado("Opción Inválida")
+    print("[❌ ERROR]: Opción fuera de rango.")
+    pausa()
+    return True
 
 # =============================================
 # PUNTO DE ENTRADA DEL PROGRAMA
 # =============================================
+# Sirve como punto de entrada del programa y ejecuta el menú principal
 if __name__ == "__main__":
     ejecutar_opcion() # Variable de control

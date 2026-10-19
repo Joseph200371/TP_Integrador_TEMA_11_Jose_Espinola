@@ -5,6 +5,7 @@
 
 import  re # Permite usar expresiones regulares para validar formatos de texto (ej: email, teléfono, etc.)
 from datetime import datetime # Permite trabajar con fechas y horas
+from utils.utilidades import pausa # Importa la función de pausa desde el módulo utils
 
 def validar_texto(mensaje):
     """Valida que el campo no esté vacío y permite cancelar con '0' o ENTER."""
@@ -109,5 +110,6 @@ def verificar_registros_existentes(registros, mensaje_error="No hay eventos regi
     """
     if not registros:
         print(f"[ℹ️ INFO]: {mensaje_error}")
+        pausa()  # Llama a la función de pausa para que el usuario pueda leer el mensaje
         return False
     return True
