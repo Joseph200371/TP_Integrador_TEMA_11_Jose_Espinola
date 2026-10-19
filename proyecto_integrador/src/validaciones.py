@@ -4,7 +4,6 @@
 # =================================================================
 
 import  re # Permite usar expresiones regulares para validar formatos de texto (ej: email, teléfono, etc.)
-
 from datetime import datetime # Permite trabajar con fechas y horas
 
 def validar_texto(mensaje):
@@ -26,9 +25,6 @@ def verificar_duplicado(registros, fecha, evento):
             return True  # Retorna True si se encuentra un duplicado
     
     return False  # Retorna False si no se encuentra duplicado
-
-from datetime import datetime
-import re
 
 def validar_fecha_valida(mensaje):
     """

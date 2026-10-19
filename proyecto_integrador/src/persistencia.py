@@ -4,7 +4,6 @@
 # del calendario en archivos locales (JSON y CSV) para que la 
 # información persista aunque se cierre la aplicación.
 # ====================================================================
-
 import json
 import csv
 import os
@@ -41,7 +40,6 @@ def guardar_datos(registros):
     """
     Función para guardar y sincronizar los registros actuales en el disco duro.
     Se ejecuta automáticamente cada vez que se crea, modifica o elimina un evento.
-    
     
     1. Persistencia en JSON: Emplea 'json.dump()' para volcar la lista completa 
        de diccionarios al archivo, aplicando indentación de 4 espacios para legibilidad 

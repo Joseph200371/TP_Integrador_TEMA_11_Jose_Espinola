@@ -2,9 +2,16 @@
 # MÓDULO: LOGICA_NEGOCIO.PY
 # Contiene todas las funciones atómicas del ABM
 # ===============================================
-from utils.utilidades import limpiar_pantalla, pausa, mostrar_encabezado, imprimir_info, ANCHO
+from utils.utilidades import pausa, mostrar_encabezado, imprimir_info, ANCHO
 from persistencia import guardar_datos
-from validaciones import validar_texto, verificar_duplicado, validar_fecha_valida, validar_evento, leer_campo_opcional, verificar_registros_existentes
+from validaciones import (
+    validar_texto,
+    verificar_duplicado,
+    validar_fecha_valida,
+    validar_evento,
+    leer_campo_opcional,
+    verificar_registros_existentes
+)
 
 def _mostrar_detalle_registro(item):
     """
@@ -18,7 +25,9 @@ def _mostrar_detalle_registro(item):
     print(f" Notas   : {item.get('notas', 'Sin notas')}")
     print("-" * ANCHO)
 
+# ===============================================
 # --- 1. ALTA (Crear Registro - Opción 1) ---
+# ===============================================
 def crear_registro(registros):
     """
     Función principal de Alta (Create - Opción 1 del submenú).
@@ -41,6 +50,7 @@ def crear_registro(registros):
     evento = leer_evento_nuevo()
     if evento is None:
         print("\n[INFO]: Operación de creación cancelada.")
+        pausa()
         return  # Sale de la función de inmediato sin alterar la lista de registros
 
     # PASO 3: Control de duplicados (Clave única: Fecha + Evento)
@@ -128,7 +138,9 @@ def _registrar_y_persistir(registros, fecha, evento, lugar, notas):
     
     pausa()
 
+# =============================================================
 # --- 2. MODIFICACIÓN (Actualizar Registro - Opción 2) ---
+# =============================================================
 def actualizar_registro(registros):
     """
     Función para modificar un registro existente buscando por su ID (Operación Update del CRUD).
@@ -174,12 +186,12 @@ def actualizar_registro(registros):
     for item in registros:
         if item.get('id') == id_a_modificar:
             registro_encontrado = item
-            break
+            break   # Encontramos el ID, salimos del ciclo for
 
-        if not registro_encontrado:
-            print(f"\n[❌ ERROR]: No se encontró ningún evento asociado al ID {id_a_modificar}.")
-            pausa()
-            return
+    if not registro_encontrado:
+        print(f"\n[❌ ERROR]: No se encontró ningún evento asociado al ID {id_a_modificar}.")
+        pausa()
+        return
         
     # 5. Mostramos los datos actuales y procedemos a la actualización campo por campo
     print(f"\n[ℹ️]: Modificando el evento ID {id_a_modificar}. (Presione ENTER para conservar el valor actual).\n")
@@ -191,7 +203,7 @@ def actualizar_registro(registros):
 
     # --- Actualización de la Fecha ---
     nueva_fecha = validar_fecha_valida(f"Nueva fecha [{registro_encontrado['fecha']}]: ")
-    if nueva_fecha in None:
+    if nueva_fecha is None:
         fecha_final = registro_encontrado['fecha']
     else:
         fecha_final = nueva_fecha
@@ -232,7 +244,9 @@ def actualizar_registro(registros):
     print(f" --------------------------------------------------------")
     pausa()
 
+# ===============================================================
 # --- FUNCIÓN AUXILIAR PARA actualizar_registro(registros) ---
+# ===============================================================
 def leer_evento_modificacion(evento_actual):
     """
     Solicita el nuevo nombre del evento para la modificación.
@@ -260,7 +274,9 @@ def leer_evento_modificacion(evento_actual):
 
         return evento_validado
 
-# --- 3. CONSULTA (Listar - Opciones 3) ---
+# ===============================================
+# --- 3. CONSULTA (Listar - Opción 3) ---
+# ===============================================
 def listar_registros(registros):
     """
     Función para listar y mostrar todos los eventos registrados (Operación Read del CRUD).
@@ -269,12 +285,11 @@ def listar_registros(registros):
     - Utiliza un ciclo 'for' para recorrer la lista de diccionarios en memoria.
     - Aplica un formato tabular o en bloques limpios usando f-strings para mejorar la experiencia de usuario.
     """
-    mostrar_encabezado("=== OPCIÓN 2: LISTAR TODOS LOS EVENTOS ===", limpiar=True)
+    mostrar_encabezado("=== OPCIÓN 3: LISTAR TODOS LOS EVENTOS ===", limpiar=True)
 
     # 1. Validamos usando la función centralizada
     if not verificar_registros_existentes(registros):
-        pausa()
-        return  # Si está vacía, la función auxiliar ya mostró el aviso y pausó, solo salimos
+        return  # Si está vacía, la función auxiliar ya mostró el aviso y pausó automáticamente
 
     print(f"Total de eventos encontrados: {len(registros)}\n")
     print("-" * ANCHO)
@@ -285,12 +300,13 @@ def listar_registros(registros):
 
     pausa()
 
+# ===============================================
 # --- 4. CONSULTA (Buscar - Opción 4) ---
+# ===============================================
 def buscar_registro(registros):
     """
     Función para buscar eventos en el sistema mediante filtros (Operación Read/Search).
     
-    Defensa para el profesor:
     - Reutiliza la validación centralizada de lista vacía.
     - Ofrece un submenú claro con dos criterios de búsqueda: por fecha exacta o por palabra clave.
     - Utiliza subcadenas ('in') y conversiones a minúsculas (.lower()) para hacer una búsqueda 
@@ -374,7 +390,9 @@ def buscar_registro(registros):
 
     pausa()
 
+# =================================================
 # --- 5. BAJA (Eliminar Registro - Opción 5) ---
+# =================================================
 def eliminar_registro(registros):
     """
     Función para eliminar un registro por su ID (Operación Delete del CRUD).
@@ -387,11 +405,10 @@ def eliminar_registro(registros):
       de forma segura de la lista en memoria.
     - Llama automáticamente a 'guardar_datos(registros)' para sincronizar disco y memoria.
     """
-    mostrar_encabezado("=== ELIMINAR EVENTO ===", limpiar=True)
+    mostrar_encabezado("=== OPCIÓN 5: ELIMINAR EVENTO ===", limpiar=True)
 
     # 1. Validación de lista vacía
     if not verificar_registros_existentes(registros):
-        pausa()
         return
 
     # 2. Mostramos un resumen rápido con los IDs disponibles
@@ -439,7 +456,8 @@ def eliminar_registro(registros):
 
     confirmacion = input("Confirme la eliminación escribiendo 's' (sí) o 'n' (no): ").strip().lower()
 
-    if confirmacion != 's' or confirmacion != 'si':
+    # Usamos 'not in' para validar correctamente si NO eligió continuar
+    if confirmacion not in ('s','si'):
         print("\n[INFO]: Operación cancelada por el usuario. El registro se conserva.")
         pausa()
         return

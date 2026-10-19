@@ -3,22 +3,27 @@
 # Punto de entrada y orquestador del menú principal
 # =========================================================
 
-from utils.utilidades import limpiar_pantalla, pausa, mostrar_encabezado, imprimir_info, ANCHO
+from utils.utilidades import pausa, mostrar_encabezado, imprimir_info, ANCHO
 
-# Importaremos las funciones reales de los otros módulos
-# from logica_negocio import crear_registro, actualizar_registro, ver_listado, buscar_registro, eliminar_registro
-# from persistencia import guardar_json, cargar_json, guardar_csv, cargar_csv, generar_dataset
+# Importamos las funciones del módulo de lógica de negocio
+from logica_negocio import (
+    crear_registro,
+    actualizar_registro,
+    listar_registros,
+    buscar_registro,
+    eliminar_registro)
+
+# AQUÍ IMPORTAMOS LAS FUNCIONES DE PERSISTENCIA
+from persistencia import cargar_datos, guardar_datos
+
 # from graficos import grafico_histograma, grafico_barras, grafico_boxplot, grafico_torta, panel_subplots
 
 # =========================================================
 # FUNCIONES ENRUTADORAS (Conectan el menú con la lógica)
 # =========================================================
-def fn_opcion_1():
-    """Menú de gestión del sistema (Opciones 1 al 5 originales)"""
-    mostrar_encabezado("Gestión del Sistema")
-    imprimir_info("[INFO]: Aquí desplegaremos el submenú de Creación, Actualización, Listado, Búsqueda y Eliminación.")
-    pausa()
-    return fn_sub_gestion_sistema()
+def fn_opcion_1(registros):
+    """Menú de gestión del sistema (Opciones 1 al 5 originales - Opciones CRUD)"""
+    return fn_sub_gestion_sistema(registros)
 
 def fn_opcion_2():
     """Gestión de Datos y Dataset (Opciones 6 al 10 originales)"""
@@ -38,7 +43,7 @@ def fn_opcion_4():
     """Salir del sistema"""
     mostrar_encabezado("Saliendo del Sistema")
     print("¡Gracias por utilizar el Calendario de Eventos! Programa finalizado correctamente.\n")
-    return False  # Este False rompe el bucle while principal
+    return False  # Este False rompe el bucle
 
 def fn_opcion_invalida():
     """Manejo de opción fuera de rango"""
@@ -46,7 +51,6 @@ def fn_opcion_invalida():
     print("[❌ ERROR]: La opción ingresada no es válida. Por favor, seleccione un número entre 1 y 4.")
     pausa()
     return True
-
 
 # ==========================
 # DICCIONARIO DE ACCIONES 
@@ -71,19 +75,18 @@ def imprimir_menu_principal():
 # =========================================================
 # FUNCIONES ENRUTADORAS (Sub_menu conectado al menú)
 # =========================================================
-def fn_sub_gestion_sistema():
+def fn_sub_gestion_sistema(registros):
     """Submenú de Gestión del Sistema (Opciones CRUD)"""
     sub_ejecutando = True
 
-    while sub_ejecutando:# (o sub_ejecutando)
+    while sub_ejecutando:
         # Usamos limpiar=True solo una vez aquí al inicio del ciclo
         mostrar_encabezado("--- SUBMENÚ: GESTIÓN DEL SISTEMA ---", limpiar=True)
         print(" 1. Crear Registro")
         print(" 2. Actualizar Registro")
-        print(" 3. Ver Listado de Registros")
+        print(" 3. Listar Registros")
         print(" 4. Buscar un Registro")
         print(" 5. Eliminar un Registro")
-        
         print(" 6. Volver al Menú Principal")
         print("=" * ANCHO + "\n")
 
@@ -93,14 +96,14 @@ def fn_sub_gestion_sistema():
             print("[❌ ERROR]: Debe ingresar un número entero válido.")
             pausa()
             continue
-
-        # Diccionario interno para el submenú (¡Cero if/elif!)
+        
+        # Diccionario interno para el submenú usando lambdas para pasar 'registros'
         acciones_sub = {
-            1: fn_sub_crear,
-            2: fn_sub_actualizar,
-            3: fn_sub_listar,
-            4: fn_sub_buscar,
-            5: fn_sub_eliminar,
+            1: lambda: fn_sub_crear(registros),
+            2: lambda: fn_sub_actualizar(registros),
+            3: lambda: fn_sub_listar(registros),
+            4: lambda: fn_sub_buscar(registros),
+            5: lambda: fn_sub_eliminar(registros),
             6: lambda: False  # Rompe el bucle del submenú y vuelve al principal
         }
         
@@ -109,39 +112,25 @@ def fn_sub_gestion_sistema():
         
     return True # Mantiene vivo el menú principal
 
-def fn_sub_crear():
-    mostrar_encabezado("Crear Nuevo Registro")
-    # Aquí llamaremos a: crear_registro(registros_en_memoria)
-    imprimir_info("[INFO]: Aquí ejecutaremos la lógica para pedir los datos del evento.")
-    pausa()
+# Llamamos a las funciones reales que creamos en logica_negocio.py
+def fn_sub_crear(registros):
+    crear_registro(registros)
     return True
 
-def fn_sub_actualizar():
-    mostrar_encabezado("Actualizar Registro")
-    # Aquí llamaremos a: actualizar_registro(registros_en_memoria)
-    imprimir_info("[INFO]: Aquí ejecutaremos la lógica para actualizar los datos del evento.")
-    pausa()
+def fn_sub_actualizar(registros):
+    actualizar_registro(registros)
     return True 
 
-def fn_sub_buscar():
-    mostrar_encabezado("Buscar Registro")
-    # Aquí llamaremos a: buscar_registro(registros_en_memoria)
-    imprimir_info("[INFO]: Aquí ejecutaremos la lógica para buscar los datos del evento.")
-    pausa()
+def fn_sub_buscar(registros):
+    buscar_registro(registros)
     return True
 
-def fn_sub_eliminar():
-    mostrar_encabezado("Eliminar Registro")
-    # Aquí llamaremos a: eliminar_registro(registros_en_memoria)
-    imprimir_info("[INFO]: Aquí ejecutaremos la lógica para eliminar los datos del evento.")
-    pausa()
+def fn_sub_eliminar(registros):
+    eliminar_registro(registros)
     return True
 
-def fn_sub_listar():
-    mostrar_encabezado("Listado de Registros")
-    # Aquí llamaremos a: ver_listado(registros_en_memoria)
-    imprimir_info("[INFO]: Aquí mostraremos todos los registros guardados.")
-    pausa()
+def fn_sub_listar(registros):
+    listar_registros(registros)
     return True
 
 def fn_opcion_invalida_sub():
@@ -165,6 +154,17 @@ def leer_opcion_user():
 
 def ejecutar_opcion():
     """Ejecuta la opción seleccionada por el usuario en un bucle hasta que decida salir."""
+    # 1. Cargamos los datos iniciales desde el disco (JSON/CSV) al arrancar el programa
+    registros = cargar_datos()
+
+    # 2. Definimos el diccionario de acciones conectando 'registros' a la opción 1
+    menu_acciones = {
+        1: lambda: fn_opcion_1(registros),
+        2: fn_opcion_2,
+        3: fn_opcion_3,
+        4: fn_opcion_4
+    }
+
     ejecutando = True
     while ejecutando:
         imprimir_menu_principal()
@@ -176,6 +176,11 @@ def ejecutar_opcion():
             ejecutando = accion_a_ejecutar()
         else:
             ejecutando = True
+
+# Y actualizamos ligeramente fn_opcion_1 para que reciba la lista:
+def fn_opcion_1(registros):
+    """Menú de gestión del sistema (Opciones CRUD)"""
+    return fn_sub_gestion_sistema(registros)
 
 # =============================================
 # PUNTO DE ENTRADA DEL PROGRAMA
