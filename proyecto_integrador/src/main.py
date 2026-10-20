@@ -21,14 +21,20 @@ from persistencia import (
     generar_dataset
     )
 
-# from graficos import grafico_histograma, grafico_barras, grafico_boxplot, grafico_torta, panel_subplots
+from graficos import (
+    grafico_histograma_notas_horizontal,
+    grafico_torta_lugares,
+    grafico_lineas_tiempo, 
+    grafico_dias_semana,
+    mostrar_panel_subplots
+    )
 
 def imprimir_menu_principal():
     """Mostrar el menú principal por pantalla."""
     mostrar_encabezado("--- MENU PROYECTO: CALENDARIO DE EVENTOS ---", limpiar=True)
     print("1. Gestión del Sistema (Crear, Actualizar, Listar, Buscar, Eliminar)")
     print("2. Gestión de Datos y Dataset (JSON, CSV y Dataset automático)")
-    print("3. Visualizaciones Gráficas (Histograma, Barras, Boxplot, Torta, Panel 2x2)")
+    print("3. Visualizaciones Gráficas (Matplotlib y Panel 2x2)")
     print("-" * ANCHO)
     print("4. Salir del Sistema")
     print("=" * ANCHO + "\n")
@@ -156,6 +162,67 @@ def fn_generar_dataset(registros):
     generar_dataset(registros)
     return True
 
+# ===============================================================
+# FUNCIONES ENRUTADORAS - GRÁFICOS (Sub_menu conectado al menú)
+# ===============================================================
+def fn_sub_gestion_graficos(registros):
+    """Submenú de Graficación (Gráficos de Matplotlib y Panel 2x2)"""
+    sub_ejecutando = True
+
+    while sub_ejecutando:
+        # Usamos limpiar=True solo una vez aquí al inicio del ciclo
+        mostrar_encabezado("--- SUBMENÚ: GESTIÓN DE GRÁFICOS ---", limpiar=True)
+        imprimir_info("[INFO]: Aquí desplegaremos el submenú de gráficos de Matplotlib y Panel 2x2.")
+        print(" 1. Gráfico de Distribución de Notas - Histograma")
+        print(" 2. Gráfico de Proporción por Lugar - Torta")
+        print(" 3. Gráfico de Eventos en el Tiempo - Líneas")
+        print(" 4. Gráfico de Distribución Semanal - Barras")
+        print(" 5. Panel 2x2 de Gráficos")
+        print(" 6. Volver al Menú Principal")
+        print("=" * ANCHO + "\n")
+
+        try:
+            opcion_sub = int(input("Seleccione una opción (1-6): ").strip())
+        except ValueError:
+            print("[❌ ERROR]: Debe ingresar un número entero válido.")
+            pausa()
+            continue
+        
+        # Diccionario interno para el submenú usando lambdas para pasar 'registros'
+        acciones_sub = {
+            1: lambda: fn_grafico_histograma_notas_horizontal(registros),
+            2: lambda: fn_grafico_torta(registros),
+            3: lambda: fn_grafico_lineas(registros),
+            4: lambda: fn_grafico_dias_semana(registros),
+            5: lambda: fn_panel_subplots(registros),
+            6: lambda: False  # Rompe el bucle del submenú y vuelve al principal
+        }
+        
+        accion = acciones_sub.get(opcion_sub, fn_opcion_invalida)
+        sub_ejecutando = accion()
+        
+    return True # Mantiene vivo el menú principal
+
+def fn_grafico_histograma_notas_horizontal(registros):
+    grafico_histograma_notas_horizontal(registros)
+    return True
+
+def fn_grafico_torta(registros):
+    grafico_torta_lugares(registros)
+    return True
+
+def fn_grafico_lineas(registros):
+    grafico_lineas_tiempo(registros)
+    return True
+
+def fn_grafico_dias_semana(registros):
+    grafico_dias_semana(registros)
+    return True
+
+def fn_panel_subplots(registros):
+    mostrar_panel_subplots(registros)
+    return True
+
 # =========================================================
 # FUNCIONES PARA LEER Y EJECUTAR LAS OPCIONES DEL MENÚ
 # =========================================================
@@ -206,12 +273,9 @@ def fn_opcion_2(registros):
     """Gestión de Datos y Dataset (Opciones 6 al 10 originales)"""
     return fn_sub_gestion_dato(registros)
 
-def fn_opcion_3(res):
+def fn_opcion_3(resgistros):
     """Visualizaciones Gráficas (Opciones 11 al 15 originales)"""
-    mostrar_encabezado("Visualizaciones Gráficas")
-    imprimir_info("[INFO]: Aquí desplegaremos el submenú de gráficos de Matplotlib y Panel 2x2.")
-    pausa()
-    return True
+    return fn_sub_gestion_graficos(resgistros)
 
 def fn_opcion_4():
     """Salir del sistema"""
