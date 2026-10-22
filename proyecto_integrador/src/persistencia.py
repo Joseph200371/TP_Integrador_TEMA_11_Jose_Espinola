@@ -201,38 +201,45 @@ def cargar_csv_manual(registros):
 # ==============================================================
 # --- 5. GENERAR DATASET DE PRUEBA (opción 5 del submenú) ---
 def generar_dataset(registros):
-    """Genera automáticamente un conjunto de registros de prueba (10 elementos)."""
+    """Genera automáticamente un conjunto de registros de prueba (10 elementos) y los acumula."""
     mostrar_encabezado("--- GENERACIÓN AUTOMÁTICA DE DATASET ---", limpiar=True)
 
-    # Verificamos si ya hay datos cargados para pedir confirmación
+    # Verificamos si ya hay datos cargados para preguntar si se desea sumar o cancelar
     if registros:
-        print("[⚠️ ADVERTENCIA]: Ya existen registros cargados en el sistema.")
-        confirmacion = input("¿Estás seguro de que deseas sobrescribirlos? 's' (sí) o 'n' (no): ").strip().lower()
+        print(f"[ℹ️ INFO]: Actualmente hay {len(registros)} registro(s) cargado(s) en el sistema.")
+        confirmacion = input("¿Deseas agregar el dataset de prueba a los registros existentes? 's' (sí) o 'n' (no): ").strip().lower()
         
         if confirmacion not in ('s','si'):
-            print("[INFO]: Operación cancelada. Se conservan los datos anteriores.")
+            print("[INFO]: Operación cancelada. Se conservan los datos anteriores intactos.")
             pausa()
             return True
     
     dataset_prueba = [
-        {"id": 1, "fecha": "10/11/2026", "evento": "Reunión de Equipo", "lugar": "Sala A", "notas": "Revisión de avances"},
-        {"id": 2, "fecha": "12/11/2026", "evento": "Entrega de Proyecto", "lugar": "Facultad", "notas": "Defensa final"},
-        {"id": 3, "fecha": "15/11/2026", "evento": "Examen de Redes", "lugar": "Aula Magna", "notas": "Estudiar capa de red"},
-        {"id": 4, "fecha": "18/11/2026", "evento": "Consulta Médica", "lugar": "Clinica Central", "notas": "Control anual"},
-        {"id": 5, "fecha": "20/11/2026", "evento": "Clase de Inglés", "lugar": "Virtual", "notas": "Practicar speaking"},
-        {"id": 6, "fecha": "22/11/2026", "evento": "Mantenimiento PC", "lugar": "Casa", "notas": "Limpieza y cambio de pasta térmica"},
-        {"id": 7, "fecha": "25/11/2026", "evento": "Festejo de Cumpleaños", "lugar": "Restaurante", "notas": "Comprar regalo"},
-        {"id": 8, "fecha": "28/11/2026", "evento": "Sincronización Git", "lugar": "GitHub", "notas": "Actualizar ramas feature"},
-        {"id": 9, "fecha": "02/12/2026", "evento": "Práctica de Laboratorio", "lugar": "Lab 2", "notas": "Montaje con transistores"},
-        {"id": 10, "fecha": "05/12/2026", "evento": "Cierre de Actas", "lugar": "Secretaría", "notas": "Verificar calificaciones"}
+        {"id": 1, "fecha": "08/10/2026", "evento": "Capacitación de Python", "lugar": "Virtual", "notas": "Repaso de entornos virtuales y dependencias."},
+        {"id": 2, "fecha": "12/10/2026", "evento": "Revisión de Cableado", "lugar": "Lab 1", "notas": "Verificación de switches y patch panels."},
+        {"id": 3, "fecha": "15/10/2026", "evento": "Almuerzo de Equipo", "lugar": "Restaurante", "notas": "Coordinación de próximos sprints."},
+        {"id": 4, "fecha": "19/10/2026", "evento": "Instalación de Software", "lugar": "Sala A", "notas": "Actualización de herramientas de desarrollo."},
+        {"id": 5, "fecha": "22/10/2026", "evento": "Prueba de Backup", "lugar": "Oficina Central", "notas": "Respaldo completo de bases de datos."},
+        {"id": 6, "fecha": "25/10/2026", "evento": "Soporte Técnico", "lugar": "Sucursal Norte", "notas": "Reemplazo de fuente de alimentación."},
+        {"id": 7, "fecha": "28/10/2026", "evento": "Meetup de Ciberseguridad", "lugar": "Aula Magna", "notas": "Charla sobre buenas prácticas en redes."},
+        {"id": 8, "fecha": "02/11/2026", "evento": "Planificación de Redes", "lugar": "Lab 2", "notas": "Diseño de subredes IP."},
+        {"id": 9, "fecha": "05/11/2026", "evento": "Auditoría de Procesos", "lugar": "Oficina Central", "notas": "Control de documentación funcional."},
+        {"id": 10, "fecha": "09/11/2026", "evento": "Presentación de Avances", "lugar": "Facultad", "notas": "Demostración del sistema ante docentes."}
     ]
 
-    registros.clear()
+    # Si ya existían registros, recalculamos los IDs para que continúen la secuencia numérica
+    if registros:
+        ultimo_id = max(r["id"] for r in registros)
+        for i, reg in enumerate(dataset_prueba, start=1):
+            reg["id"] = ultimo_id + i
+
+    # Acumulamos los nuevos registros con los que ya estaban
     registros.extend(dataset_prueba)
+
     # Intentamos sincronizar en disco
     try:
         guardar_datos(registros)
-        print("[✅ ÉXITO]: Se ha generado y cargado un dataset de prueba con 10 registros exitosamente.")
+        print("[✅ ÉXITO]: Se ha agregado el dataset de prueba con 10 nuevos registros exitosamente.")
     except Exception as e:
         print(f"[❌ ERROR]: No se pudo guardar el dataset en el disco: {e}")
 
